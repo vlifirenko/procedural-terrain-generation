@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f1f4ce489ce34636bf7f3f26cc50bb57, type: 3}
-  m_Name: Biome_GrassyPlains
+  m_Name: Biome_Swamp
   m_EditorClassIdentifier: 
-  Name: GrassyPlains
+  Name: Swamp
   minIntensity: 0.5
   maxIntensity: 1
   minDecayRate: 0.1

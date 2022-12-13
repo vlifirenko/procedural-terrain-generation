@@ -21,3 +21,6 @@ MonoBehaviour:
     weight: 0.25
   - biome: {fileID: 11400000, guid: 3117d41b362f37a4c85424c687bc135d, type: 2}
     weight: 0.5
+  - biome: {fileID: 11400000, guid: 48ff2d01239c8e549a93d371dcff9992, type: 2}
+    weight: 0.5
+  biomeSeedPointDensity: 0.1

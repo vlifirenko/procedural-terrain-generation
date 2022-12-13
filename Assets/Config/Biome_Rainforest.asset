@@ -13,3 +13,7 @@ MonoBehaviour:
   m_Name: Biome_Rainforest
   m_EditorClassIdentifier: 
   Name: Rainforest
+  minIntensity: 0.5
+  maxIntensity: 1
+  minDecayRate: 0.1
+  maxDecayRate: 0.2
