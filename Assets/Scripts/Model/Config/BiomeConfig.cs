@@ -12,5 +12,7 @@ namespace PTG.Model.Config
         
         [Range(0f, 1f)] public float minDecayRate = 0.01f;
         [Range(0f, 1f)] public float maxDecayRate = 0.02f;
+
+        public GameObject heightModifier;
     }
 }

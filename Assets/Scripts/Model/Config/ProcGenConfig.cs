@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using PTG.Model.Enum;
 using UnityEngine;
 
 namespace PTG.Model.Config
@@ -9,6 +10,9 @@ namespace PTG.Model.Config
     {
         public List<BiomeConfigItem> biomes;
         [Range(0f, 1f)] public float biomeSeedPointDensity = 0.1f;
+        public EBiomeMapBaseResolution biomeMapBaseResolution = EBiomeMapBaseResolution.Size_64x64;
+        public GameObject InitialHeightModifier;
+        public GameObject HeightPostProcessingModifier;
 
         public int NumBiomes => biomes.Count;
         public float TotalWeight => biomes.Sum(biome => biome.weight);
