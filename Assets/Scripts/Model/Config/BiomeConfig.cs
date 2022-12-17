@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace PTG.Model.Config
 {
@@ -14,5 +15,8 @@ namespace PTG.Model.Config
         [Range(0f, 1f)] public float maxDecayRate = 0.02f;
 
         public GameObject heightModifier;
+        public GameObject terrainPainter;
+
+        public List<BiomeTexture> textures;
     }
 }

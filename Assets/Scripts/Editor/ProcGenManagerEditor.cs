@@ -11,6 +11,15 @@ namespace PTG.Editor
         {
             DrawDefaultInspector();
 
+            if (GUILayout.Button("Regenerate Textures"))
+            {
+                var targetManager = serializedObject.targetObject as ProcGenManager;
+                if (targetManager == null)
+                    throw new Exception("targetManager is null");
+                
+                targetManager.RegenerateTextures();
+            }
+            
             if (GUILayout.Button("Regenerate World"))
             {
                 var targetManager = serializedObject.targetObject as ProcGenManager;

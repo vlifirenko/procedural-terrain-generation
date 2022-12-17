@@ -1,8 +1,13 @@
 ﻿using System.Collections.Generic;
 using PTG.HeightMapModifiers;
 using PTG.Model.Config;
-using Unity.VisualScripting;
 using UnityEngine;
+#if UNITY_EDITOR
+using PTG.TexturePainters;
+using UnityEditor;
+using UnityEngine.SceneManagement;
+
+#endif
 
 namespace PTG
 {
@@ -18,7 +23,7 @@ namespace PTG
         private byte[,] _biomeMap;
         private float[,] _biomeStrengths;
 
-        private readonly Vector2Int[] _neighbourOffsets = new Vector2Int[]
+        private readonly Vector2Int[] _neighbourOffsets =
         {
             new Vector2Int(0, 1),
             new Vector2Int(0, -1),
@@ -29,19 +34,51 @@ namespace PTG
             new Vector2Int(1, -1),
             new Vector2Int(-1, 1),
         };
+
+        private Dictionary<string, int> _biomeTextureToTerrainLayerIndex = new Dictionary<string, int>();
 #endif
 
 #if UNITY_EDITOR
+
+        public void RegenerateTextures()
+        {
+            Perform_LayerSetup();
+        }
+
         public void RegenerateWorld()
         {
             // cache the map resolution
             var mapResolution = terrain.terrainData.heightmapResolution;
+            var alphaMapResolution = terrain.terrainData.alphamapResolution;
+
+            Perform_GenerateTextureMapping();
 
             Perform_BiomeGeneration_LowResolution((int) config.biomeMapBaseResolution);
 
             Perform_BiomeGeneration_HighResolution((int) config.biomeMapBaseResolution, mapResolution);
 
             Perform_HeightMapModification(mapResolution);
+
+            Perform_TerrainPainting(mapResolution, alphaMapResolution);
+        }
+
+        public int GetLayerForTexture(string uniqueID) => _biomeTextureToTerrainLayerIndex[uniqueID];
+
+        private void Perform_GenerateTextureMapping()
+        {
+            _biomeTextureToTerrainLayerIndex.Clear();
+
+            var layerIndex = 0;
+            foreach (var biomeMetaData in config.biomes)
+            {
+                var biome = biomeMetaData.biome;
+
+                foreach (var biomeTexture in biome.textures)
+                {
+                    _biomeTextureToTerrainLayerIndex[biomeTexture.uniqueID] = layerIndex;
+                    layerIndex++;
+                }
+            }
         }
 
         private void Perform_BiomeGeneration_LowResolution(int mapResolution)
@@ -212,7 +249,7 @@ namespace PTG
             return (byte) Mathf.RoundToInt(bestBiome);
         }
 
-        private void Perform_HeightMapModification(in int mapResolution)
+        private void Perform_HeightMapModification(int mapResolution)
         {
             var heightMap = terrain.terrainData.GetHeights(0, 0, mapResolution, mapResolution);
 
@@ -224,13 +261,12 @@ namespace PTG
                     modifier.Execute(mapResolution, heightMap, terrain.terrainData.heightmapScale);
             }
 
-            //foreach (var biome in config.biomes)
             for (var i = 0; i < config.NumBiomes; i++)
             {
                 var biome = config.biomes[i].biome;
                 if (biome.heightModifier == null)
                     continue;
-                
+
                 var modifiers = biome.heightModifier.GetComponents<BaseMapHeightModifier>();
 
                 foreach (var modifier in modifiers)
@@ -248,6 +284,81 @@ namespace PTG
             terrain.terrainData.SetHeights(0, 0, heightMap);
         }
 
+        private void Perform_TerrainPainting(int mapResolution, int alphaMapResolution)
+        {
+            var heightMap = terrain.terrainData.GetHeights(0, 0, mapResolution, mapResolution);
+            var alphaMaps = terrain.terrainData.GetAlphamaps(0, 0, alphaMapResolution, alphaMapResolution);
+
+            for (var i = 0; i < config.NumBiomes; i++)
+            {
+                var biome = config.biomes[i].biome;
+                if (biome.heightModifier == null)
+                    continue;
+
+                var modifiers = biome.terrainPainter.GetComponents<BaseTexturePainter>();
+
+                foreach (var modifier in modifiers)
+                    modifier.Execute(this, mapResolution, heightMap, terrain.terrainData.heightmapScale, alphaMaps,
+                        alphaMapResolution, _biomeMap, i, biome);
+            }
+
+            terrain.terrainData.SetAlphamaps(0, 0, alphaMaps);
+        }
+
+        private void Perform_LayerSetup()
+        {
+            if (terrain.terrainData.terrainLayers != null && terrain.terrainData.terrainLayers.Length > 0)
+            {
+                Undo.RecordObject(terrain, "Clearing previous layers");
+
+                var layersToDelete = new List<string>();
+                foreach (var layer in terrain.terrainData.terrainLayers)
+                {
+                    if (layer == null)
+                        continue;
+
+                    layersToDelete.Add(AssetDatabase.GetAssetPath(layer.GetInstanceID()));
+                }
+
+                terrain.terrainData.terrainLayers = null;
+                foreach (var layerFile in layersToDelete)
+                {
+                    if (string.IsNullOrEmpty(layerFile))
+                        continue;
+
+                    AssetDatabase.DeleteAsset(layerFile);
+                }
+
+                Undo.FlushUndoRecordObjects();
+            }
+
+            var scenePath = System.IO.Path.GetDirectoryName(SceneManager.GetActiveScene().path);
+            var newLayers = new List<TerrainLayer>();
+
+            foreach (var biomeMetaData in config.biomes)
+            {
+                var biome = biomeMetaData.biome;
+
+                foreach (var biomeTexture in biome.textures)
+                {
+                    var textureLayer = new TerrainLayer
+                    {
+                        diffuseTexture = biomeTexture.diffuse,
+                        normalMapTexture = biomeTexture.normal
+                    };
+
+                    var layerPath = System.IO.Path.Combine(scenePath, $"Layer_{biome.name}_{biomeTexture.uniqueID}");
+
+                    AssetDatabase.CreateAsset(textureLayer, layerPath);
+
+                    _biomeTextureToTerrainLayerIndex[biomeTexture.uniqueID] = newLayers.Count;
+                    newLayers.Add(textureLayer);
+                }
+            }
+
+            Undo.RecordObject(terrain.terrainData, "Updating terrain layers");
+            terrain.terrainData.terrainLayers = newLayers.ToArray();
+        }
 #endif
     }
 }
