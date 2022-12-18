@@ -3,6 +3,7 @@ using PTG.HeightMapModifiers;
 using PTG.Model.Config;
 using UnityEngine;
 #if UNITY_EDITOR
+using PTG.ObjectPlacers;
 using PTG.TexturePainters;
 using UnityEditor;
 using UnityEngine.SceneManagement;
@@ -22,6 +23,7 @@ namespace PTG
 
         private byte[,] _biomeMap;
         private float[,] _biomeStrengths;
+        private float[,] _slopeMap;
 
         private readonly Vector2Int[] _neighbourOffsets =
         {
@@ -57,9 +59,11 @@ namespace PTG
 
             Perform_BiomeGeneration_HighResolution((int) config.biomeMapBaseResolution, mapResolution);
 
-            Perform_HeightMapModification(mapResolution);
+            Perform_HeightMapModification(mapResolution, alphaMapResolution);
 
             Perform_TerrainPainting(mapResolution, alphaMapResolution);
+
+            Perform_ObjectPlacement(mapResolution, alphaMapResolution);
         }
 
         public int GetLayerForTexture(string uniqueID) => _biomeTextureToTerrainLayerIndex[uniqueID];
@@ -249,7 +253,7 @@ namespace PTG
             return (byte) Mathf.RoundToInt(bestBiome);
         }
 
-        private void Perform_HeightMapModification(int mapResolution)
+        private void Perform_HeightMapModification(int mapResolution, int alphaMapResolution)
         {
             var heightMap = terrain.terrainData.GetHeights(0, 0, mapResolution, mapResolution);
 
@@ -282,6 +286,18 @@ namespace PTG
             }
 
             terrain.terrainData.SetHeights(0, 0, heightMap);
+
+            _slopeMap = new float[alphaMapResolution, alphaMapResolution];
+
+            for (var y = 0; y < alphaMapResolution; y++)
+            {
+                for (var x = 0; x < alphaMapResolution; x++)
+                {
+                    _slopeMap[x, y] = terrain.terrainData.GetInterpolatedNormal(
+                        (float) x / alphaMapResolution,
+                        (float) y / alphaMapResolution).y;
+                }
+            }
         }
 
         private void Perform_TerrainPainting(int mapResolution, int alphaMapResolution)
@@ -289,20 +305,63 @@ namespace PTG
             var heightMap = terrain.terrainData.GetHeights(0, 0, mapResolution, mapResolution);
             var alphaMaps = terrain.terrainData.GetAlphamaps(0, 0, alphaMapResolution, alphaMapResolution);
 
+
+            for (var y = 0; y < alphaMapResolution; y++)
+            {
+                for (var x = 0; x < alphaMapResolution; x++)
+                {
+                    for (var layerIndex = 0; layerIndex < terrain.terrainData.alphamapLayers; layerIndex++)
+                    {
+                        alphaMaps[x, y, layerIndex] = 0;
+                    }
+                }
+            }
+
             for (var i = 0; i < config.NumBiomes; i++)
             {
                 var biome = config.biomes[i].biome;
-                if (biome.heightModifier == null)
+                if (biome.terrainPainter == null)
                     continue;
 
                 var modifiers = biome.terrainPainter.GetComponents<BaseTexturePainter>();
 
                 foreach (var modifier in modifiers)
-                    modifier.Execute(this, mapResolution, heightMap, terrain.terrainData.heightmapScale, alphaMaps,
-                        alphaMapResolution, _biomeMap, i, biome);
+                    modifier.Execute(this, mapResolution, heightMap, terrain.terrainData.heightmapScale, _slopeMap,
+                        alphaMaps, alphaMapResolution, _biomeMap, i, biome);
+            }
+
+            if (config.paintingPostProcessingModifier != null)
+            {
+                var modifiers = config.paintingPostProcessingModifier.GetComponents<BaseTexturePainter>();
+
+                foreach (var modifier in modifiers)
+                    modifier.Execute(this, mapResolution, heightMap, terrain.terrainData.heightmapScale, _slopeMap,
+                        alphaMaps, alphaMapResolution);
             }
 
             terrain.terrainData.SetAlphamaps(0, 0, alphaMaps);
+        }
+
+        private void Perform_ObjectPlacement(int mapResolution, int alphaMapResolution)
+        {
+            for (var i = transform.childCount - 1; i >= 0; i--)
+                Undo.DestroyObjectImmediate(transform.GetChild(i).gameObject);
+
+            var heightMap = terrain.terrainData.GetHeights(0, 0, mapResolution, mapResolution);
+            var alphaMaps = terrain.terrainData.GetAlphamaps(0, 0, alphaMapResolution, alphaMapResolution);
+
+            for (var i = 0; i < config.NumBiomes; i++)
+            {
+                var biome = config.biomes[i].biome;
+                if (biome.objectPlacer == null)
+                    continue;
+
+                var modifiers = biome.objectPlacer.GetComponents<BaseObjectPlacer>();
+
+                foreach (var modifier in modifiers)
+                    modifier.Execute(transform, mapResolution, heightMap, terrain.terrainData.heightmapScale, _slopeMap,
+                        alphaMaps, alphaMapResolution, _biomeMap, i, biome);
+            }
         }
 
         private void Perform_LayerSetup()

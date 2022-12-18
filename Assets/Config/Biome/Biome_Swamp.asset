@@ -19,6 +19,7 @@ MonoBehaviour:
   maxDecayRate: 0.2
   heightModifier: {fileID: 871424789203265994, guid: a12a1b2c26f7fb34a86dffdf408d8a52, type: 3}
   terrainPainter: {fileID: 472561104542651329, guid: 11009eab9fd3a184d89755971362d4df, type: 3}
+  objectPlacer: {fileID: 7873144076796657020, guid: 827b68e0daf1403489cb64e61e79cfc6, type: 3}
   textures:
   - uniqueID: swamp-swamp
     diffuse: {fileID: 2800000, guid: db05d76cd29834149b49361b3b08abda, type: 3}

@@ -19,6 +19,7 @@ MonoBehaviour:
   maxDecayRate: 0.2
   heightModifier: {fileID: 871424789203265994, guid: c83fa33db9ee8da4ba6ee700ff1e0080, type: 3}
   terrainPainter: {fileID: 472561104542651329, guid: b80daaa051d7d534b92b9061986fd30a, type: 3}
+  objectPlacer: {fileID: 7873144076796657020, guid: cad44ba264111de4d8f2d71744dfe7c8, type: 3}
   textures:
   - uniqueID: rainforest-grass
     diffuse: {fileID: 2800000, guid: 574e7a537f2d33e4f8710aa589098b9c, type: 3}

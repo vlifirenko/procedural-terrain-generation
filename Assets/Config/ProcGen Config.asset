@@ -27,3 +27,4 @@ MonoBehaviour:
   biomeMapBaseResolution: 64
   InitialHeightModifier: {fileID: 4016068634296311445, guid: 5db0d4283f806854db23410010d4cd92, type: 3}
   HeightPostProcessingModifier: {fileID: 4016068634296311445, guid: fa91958a336d4b24d9efe06e3ed6d402, type: 3}
+  paintingPostProcessingModifier: {fileID: 1204040199357048343, guid: 0daac5c8ee8a6da4897886e1a5a6be4f, type: 3}

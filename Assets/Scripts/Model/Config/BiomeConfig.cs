@@ -16,6 +16,7 @@ namespace PTG.Model.Config
 
         public GameObject heightModifier;
         public GameObject terrainPainter;
+        public GameObject objectPlacer;
 
         public List<BiomeTexture> textures;
     }
