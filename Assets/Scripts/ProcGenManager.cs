@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using PTG.HeightMapModifiers;
 using PTG.Model.Config;
 using UnityEngine;
 #if UNITY_EDITOR
+using PTG.Model;
 using PTG.ObjectPlacers;
 using PTG.TexturePainters;
 using UnityEditor;
@@ -37,7 +39,7 @@ namespace PTG
             new Vector2Int(-1, 1),
         };
 
-        private Dictionary<string, int> _biomeTextureToTerrainLayerIndex = new Dictionary<string, int>();
+        private Dictionary<TextureConfig, int> _biomeTextureToTerrainLayerIndex = new Dictionary<TextureConfig, int>();
 #endif
 
 #if UNITY_EDITOR
@@ -72,16 +74,24 @@ namespace PTG
         {
             _biomeTextureToTerrainLayerIndex.Clear();
 
-            var layerIndex = 0;
+            var allTextures = new List<TextureConfig>();
             foreach (var biomeMetaData in config.biomes)
             {
-                var biome = biomeMetaData.biome;
+                var biomeTextures = biomeMetaData.biome.RetrieveTextures();
+                if (biomeTextures == null || biomeTextures.Count == 0)
+                    continue;
 
-                foreach (var biomeTexture in biome.textures)
-                {
-                    _biomeTextureToTerrainLayerIndex[biomeTexture.uniqueID] = layerIndex;
-                    layerIndex++;
-                }
+                allTextures.AddRange(biomeTextures);
+            }
+
+            allTextures = allTextures.Distinct().ToList();
+
+            var layerIndex = 0;
+
+            foreach (var textureConfig in allTextures)
+            {
+                _biomeTextureToTerrainLayerIndex[textureConfig] = layerIndex;
+                layerIndex++;
             }
         }
 
@@ -392,7 +402,23 @@ namespace PTG
             }
 
             var scenePath = System.IO.Path.GetDirectoryName(SceneManager.GetActiveScene().path);
+
+            Perform_GenerateTextureMapping();
+
+            var numLayers = _biomeTextureToTerrainLayerIndex.Count;
             var newLayers = new List<TerrainLayer>();
+
+            for (var i = 0; i < numLayers; i++)
+                newLayers.Add(new TerrainLayer());
+
+            foreach (var entry in _biomeTextureToTerrainLayerIndex)
+            {
+                var textureConfig = entry.Key;
+                var textureLayer = entry.Value;
+
+                newLayers[textureLayer].diffuseTexture = textureConfig.diffuse;
+                newLayers[textureLayer].normalMapTexture = textureConfig.normal;
+            }
 
             foreach (var biomeMetaData in config.biomes)
             {

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using PTG.Model;
 using PTG.Model.Config;
 using UnityEngine;
 
@@ -6,7 +7,7 @@ namespace PTG.TexturePainters
 {
     public class TexturePainter_Slope : BaseTexturePainter
     {
-        [SerializeField] private string textureID;
+        [SerializeField] private TextureConfig texture;
         [SerializeField] private AnimationCurve intensityVsSlope;
 
         public override void Execute(ProcGenManager procGenManager, int mapResolution, float[,] heightMap, Vector3 heightmapScale,
@@ -31,5 +32,7 @@ namespace PTG.TexturePainters
                 }
             }
         }
+
+        public override List<TextureConfig> RetrieveTextures() => new List<TextureConfig> {texture};
     }
 }

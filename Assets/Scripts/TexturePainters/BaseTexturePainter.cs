@@ -1,4 +1,6 @@
-﻿using PTG.Model.Config;
+﻿using System.Collections.Generic;
+using PTG.Model;
+using PTG.Model.Config;
 using UnityEngine;
 
 namespace PTG.TexturePainters
@@ -11,5 +13,7 @@ namespace PTG.TexturePainters
             float[,] slopeMap, float[,,] alphaMaps, int alphaMapResolution, byte[,] biomeMap = null, int biomeIndex = -1,
             BiomeConfig biome = null)
             => Debug.LogError($"No implementation of Execute function for {gameObject.name}");
+
+        public virtual List<TextureConfig> RetrieveTextures() => null;
     }
 }

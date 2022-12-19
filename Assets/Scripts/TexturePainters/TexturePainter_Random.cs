@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using PTG.Model;
 using PTG.Model.Config;
 using UnityEngine;
 
@@ -6,7 +7,7 @@ namespace PTG.TexturePainters
 {
     public class TexturePainter_Random : BaseTexturePainter
     {
-        [SerializeField] private List<string> textureIDs;
+        [SerializeField] private List<TextureConfig> textures;
 
         public override void Execute(ProcGenManager procGenManager, int mapResolution, float[,] heightMap, Vector3 heightmapScale,
             float[,] slopeMap, float[,,] alphaMaps, int alphaMapResolution, byte[,] biomeMap = null, int biomeIndex = -1,
@@ -31,5 +32,7 @@ namespace PTG.TexturePainters
                 }
             }
         }
+
+        public override List<TextureConfig> RetrieveTextures() => textures;
     }
 }
