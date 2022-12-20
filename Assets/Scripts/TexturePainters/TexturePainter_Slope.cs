@@ -14,7 +14,7 @@ namespace PTG.TexturePainters
             float[,] slopeMap, float[,,] alphaMaps, int alphaMapResolution, byte[,] biomeMap = null, int biomeIndex = -1,
             BiomeConfig biome = null)
         {
-            var textureLayer = procGenManager.GetLayerForTexture(textureID);
+            var textureLayer = procGenManager.GetLayerForTexture(texture);
 
             for (var y = 0; y < alphaMapResolution; y++)
             {

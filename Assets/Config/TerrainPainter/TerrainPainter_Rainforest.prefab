@@ -46,7 +46,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   strength: 1
-  textureID: rainforest-grass
+  texture:
+    diffuse: {fileID: 2800000, guid: 574e7a537f2d33e4f8710aa589098b9c, type: 3}
+    normal: {fileID: 0}
   intensityVsSlope:
     serializedVersion: 2
     m_Curve:
@@ -93,7 +95,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   strength: 1
-  textureID: rainforest-rock
+  texture:
+    diffuse: {fileID: 2800000, guid: 5438fa2935764304e98148e7379d1c53, type: 3}
+    normal: {fileID: 0}
   intensityVsSlope:
     serializedVersion: 2
     m_Curve:

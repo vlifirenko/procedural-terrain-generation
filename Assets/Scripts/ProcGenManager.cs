@@ -68,7 +68,7 @@ namespace PTG
             Perform_ObjectPlacement(mapResolution, alphaMapResolution);
         }
 
-        public int GetLayerForTexture(string uniqueID) => _biomeTextureToTerrainLayerIndex[uniqueID];
+        public int GetLayerForTexture(TextureConfig textureConfig) => _biomeTextureToTerrainLayerIndex[textureConfig];
 
         private void Perform_GenerateTextureMapping()
         {
@@ -82,6 +82,20 @@ namespace PTG
                     continue;
 
                 allTextures.AddRange(biomeTextures);
+            }
+
+            if (config.paintingPostProcessingModifier != null)
+            {
+                var allPainters = config.paintingPostProcessingModifier.GetComponents<BaseTexturePainter>();
+                foreach (var painter in allPainters)
+                {
+                    var painterTextures = painter.RetrieveTextures();
+
+                    if (painterTextures == null || painterTextures.Count == 0)
+                        continue;
+
+                    allTextures.AddRange(painterTextures);
+                }
             }
 
             allTextures = allTextures.Distinct().ToList();
@@ -414,31 +428,14 @@ namespace PTG
             foreach (var entry in _biomeTextureToTerrainLayerIndex)
             {
                 var textureConfig = entry.Key;
-                var textureLayer = entry.Value;
+                var textureLayerIndex = entry.Value;
+                var textureLayer = newLayers[textureLayerIndex];
 
-                newLayers[textureLayer].diffuseTexture = textureConfig.diffuse;
-                newLayers[textureLayer].normalMapTexture = textureConfig.normal;
-            }
-
-            foreach (var biomeMetaData in config.biomes)
-            {
-                var biome = biomeMetaData.biome;
-
-                foreach (var biomeTexture in biome.textures)
-                {
-                    var textureLayer = new TerrainLayer
-                    {
-                        diffuseTexture = biomeTexture.diffuse,
-                        normalMapTexture = biomeTexture.normal
-                    };
-
-                    var layerPath = System.IO.Path.Combine(scenePath, $"Layer_{biome.name}_{biomeTexture.uniqueID}");
-
-                    AssetDatabase.CreateAsset(textureLayer, layerPath);
-
-                    _biomeTextureToTerrainLayerIndex[biomeTexture.uniqueID] = newLayers.Count;
-                    newLayers.Add(textureLayer);
-                }
+                textureLayer.diffuseTexture = textureConfig.diffuse;
+                textureLayer.normalMapTexture = textureConfig.normal;
+                
+                var layerPath = System.IO.Path.Combine(scenePath, $"Layer_{textureLayerIndex}");
+                AssetDatabase.CreateAsset(textureLayer, layerPath);
             }
 
             Undo.RecordObject(terrain.terrainData, "Updating terrain layers");

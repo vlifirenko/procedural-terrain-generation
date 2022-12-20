@@ -25,7 +25,7 @@ namespace PTG.TexturePainters
                     if (biomeIndex >= 0 && biomeMap[heightMapX, heightMapY] != biomeIndex)
                         continue;
 
-                    var randomTexture = textureIDs[Random.Range(0, textureIDs.Count)];
+                    var randomTexture = textures[Random.Range(0, textures.Count)];
                     var terrainLayer = procGenManager.GetLayerForTexture(randomTexture);
 
                     alphaMaps[x, y, terrainLayer] = strength;

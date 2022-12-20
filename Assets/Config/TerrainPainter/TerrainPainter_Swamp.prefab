@@ -45,6 +45,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   strength: 1
-  textureIDs:
-  - swamp-swamp
-  - swamp-rock
+  textures:
+  - diffuse: {fileID: 2800000, guid: db05d76cd29834149b49361b3b08abda, type: 3}
+    normal: {fileID: 0}
+  - diffuse: {fileID: 2800000, guid: d6577540c8f040a49a9d70b24407c585, type: 3}
+    normal: {fileID: 0}
