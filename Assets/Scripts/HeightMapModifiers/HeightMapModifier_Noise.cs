@@ -13,7 +13,7 @@ namespace PTG.HeightMapModifiers
         [SerializeField] private float yScaleVariationPerPass = 2f;
         [SerializeField] private float heightDeltaVariationPerPass = 0.5f;
 
-        public override void Execute(int mapResolution, float[,] heightMap, Vector3 heightmapScale, byte[,] biomeMap = null,
+        public override void Execute(int mapResolution, float[,] heightMap, Vector3 heightMapScale, byte[,] biomeMap = null,
             int biomeIndex = -1, BiomeConfig biome = null)
         {
             var workingXScale = xScale;
@@ -30,7 +30,7 @@ namespace PTG.HeightMapModifiers
                             continue;
 
                         var noiseValue = Mathf.PerlinNoise(x * workingXScale, y * workingYScale) * 2f - 1f;
-                        var newHeight = heightMap[x, y] + noiseValue * workingHeightDelta / heightmapScale.y;
+                        var newHeight = heightMap[x, y] + noiseValue * workingHeightDelta / heightMapScale.y;
 
                         heightMap[x, y] = Mathf.Lerp(heightMap[x, y], newHeight, strength);
                     }

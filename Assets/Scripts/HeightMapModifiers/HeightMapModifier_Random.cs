@@ -7,7 +7,7 @@ namespace PTG.HeightMapModifiers
     {
         [SerializeField] private float heightDelta;
         
-        public override void Execute(int mapResolution, float[,] heightMap, Vector3 heightmapScale, byte[,] biomeMap = null,
+        public override void Execute(int mapResolution, float[,] heightMap, Vector3 heightMapScale, byte[,] biomeMap = null,
             int biomeIndex = -1, BiomeConfig biome = null)
         {
             for (var y = 0; y < mapResolution; y++)
@@ -17,7 +17,7 @@ namespace PTG.HeightMapModifiers
                     if (biomeIndex >= 0 && biomeMap[x, y] != biomeIndex)
                         continue;
 
-                    var newHeight = heightMap[x, y] + Random.Range(-heightDelta, heightDelta) / heightmapScale.y;
+                    var newHeight = heightMap[x, y] + Random.Range(-heightDelta, heightDelta) / heightMapScale.y;
                     heightMap[x, y] = Mathf.Lerp(heightMap[x, y], newHeight, strength);
                 }
             }

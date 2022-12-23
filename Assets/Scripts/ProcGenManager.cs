@@ -54,6 +54,9 @@ namespace PTG
             // cache the map resolution
             var mapResolution = terrain.terrainData.heightmapResolution;
             var alphaMapResolution = terrain.terrainData.alphamapResolution;
+            
+            for (var i = transform.childCount - 1; i >= 0; i--)
+                Undo.DestroyObjectImmediate(transform.GetChild(i).gameObject);
 
             Perform_GenerateTextureMapping();
 
@@ -368,9 +371,6 @@ namespace PTG
 
         private void Perform_ObjectPlacement(int mapResolution, int alphaMapResolution)
         {
-            for (var i = transform.childCount - 1; i >= 0; i--)
-                Undo.DestroyObjectImmediate(transform.GetChild(i).gameObject);
-
             var heightMap = terrain.terrainData.GetHeights(0, 0, mapResolution, mapResolution);
             var alphaMaps = terrain.terrainData.GetAlphamaps(0, 0, alphaMapResolution, alphaMapResolution);
 
