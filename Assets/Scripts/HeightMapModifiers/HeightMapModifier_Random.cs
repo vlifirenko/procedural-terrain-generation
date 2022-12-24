@@ -6,9 +6,9 @@ namespace PTG.HeightMapModifiers
     public class HeightMapModifier_Random : BaseMapHeightModifier
     {
         [SerializeField] private float heightDelta;
-        
-        public override void Execute(int mapResolution, float[,] heightMap, Vector3 heightMapScale, byte[,] biomeMap = null,
-            int biomeIndex = -1, BiomeConfig biome = null)
+
+        public override void Execute(ProcGenConfig globalConfig, int mapResolution, float[,] heightMap, Vector3 heightMapScale,
+            byte[,] biomeMap = null, int biomeIndex = -1, BiomeConfig biome = null)
         {
             for (var y = 0; y < mapResolution; y++)
             {

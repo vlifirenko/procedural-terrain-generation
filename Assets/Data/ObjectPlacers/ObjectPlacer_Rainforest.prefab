@@ -44,6 +44,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf615ed247384fdd8699a6adea91bb1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  canGoInWater: 0
+  canGoAboveWater: 1
   targetDensity: 0.1
   maxSpawnCount: 1000
   prefab: {fileID: 2455013154365097266, guid: f60bfcd7bf40b4743b171645d36c38f4, type: 3}

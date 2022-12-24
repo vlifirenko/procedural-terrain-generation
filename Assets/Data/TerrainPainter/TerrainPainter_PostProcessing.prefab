@@ -114,7 +114,7 @@ MonoBehaviour:
     diffuse: {fileID: 2800000, guid: 34f14a360306f3046b13b4f7cd7ceb86, type: 3}
     normal: {fileID: 0}
   startHeight: 0
-  endHeight: 15
+  endHeight: 17.5
   intensity:
     serializedVersion: 2
     m_Curve:

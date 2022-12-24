@@ -10,7 +10,7 @@ namespace PTG.HeightMapModifiers
         [SerializeField] private int smoothingKernelSize = 5;
         [SerializeField] private List<FeatureConfig> features;
 
-        public override void Execute(int mapResolution, float[,] heightMap, Vector3 heightMapScale, byte[,] biomeMap = null,
+        public override void Execute(ProcGenConfig globalConfig,int mapResolution, float[,] heightMap, Vector3 heightMapScale, byte[,] biomeMap = null,
             int biomeIndex = -1, BiomeConfig biome = null)
         {
             foreach (var feature in features)

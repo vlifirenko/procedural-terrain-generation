@@ -16,6 +16,8 @@ namespace PTG.Model.Config
         public GameObject HeightPostProcessingModifier;
         public GameObject paintingPostProcessingModifier;
 
+        public float waterHeight = 15f;
+
         public int NumBiomes => biomes.Count;
         public float TotalWeight => biomes.Sum(biome => biome.weight);
     }

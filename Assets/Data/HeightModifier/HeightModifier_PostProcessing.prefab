@@ -99,5 +99,5 @@ MonoBehaviour:
   buildings:
   - heightMap: {fileID: 2800000, guid: add28abac2e2cca42af0b2abd7935eb7, type: 3}
     prefab: {fileID: 7880999669688678654, guid: e8c210deacd13b9489985aa64cd18939, type: 3}
-    radius: 30
+    radius: 25
     numToSpawn: 5

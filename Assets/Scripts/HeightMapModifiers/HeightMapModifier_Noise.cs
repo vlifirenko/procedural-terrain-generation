@@ -13,8 +13,8 @@ namespace PTG.HeightMapModifiers
         [SerializeField] private float yScaleVariationPerPass = 2f;
         [SerializeField] private float heightDeltaVariationPerPass = 0.5f;
 
-        public override void Execute(int mapResolution, float[,] heightMap, Vector3 heightMapScale, byte[,] biomeMap = null,
-            int biomeIndex = -1, BiomeConfig biome = null)
+        public override void Execute(ProcGenConfig globalConfig, int mapResolution, float[,] heightMap, Vector3 heightMapScale,
+            byte[,] biomeMap = null, int biomeIndex = -1, BiomeConfig biome = null)
         {
             var workingXScale = xScale;
             var workingYScale = yScale;

@@ -19,7 +19,4 @@ MonoBehaviour:
   maxDecayRate: 0.2
   heightModifier: {fileID: 871424789203265994, guid: f223405b99b0a784c8315be58c77f0be, type: 3}
   terrainPainter: {fileID: 472561104542651329, guid: b80daaa051d7d534b92b9061986fd30a, type: 3}
-  textures:
-  - uniqueID: plains-grass
-    diffuse: {fileID: 2800000, guid: 574e7a537f2d33e4f8710aa589098b9c, type: 3}
-    normal: {fileID: 0}
+  objectPlacer: {fileID: 7873144076796657020, guid: 27854d8cf7c32f841aa1527610844ef3, type: 3}

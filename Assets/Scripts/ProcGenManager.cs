@@ -54,7 +54,7 @@ namespace PTG
             // cache the map resolution
             var mapResolution = terrain.terrainData.heightmapResolution;
             var alphaMapResolution = terrain.terrainData.alphamapResolution;
-            
+
             for (var i = transform.childCount - 1; i >= 0; i--)
                 Undo.DestroyObjectImmediate(transform.GetChild(i).gameObject);
 
@@ -289,7 +289,7 @@ namespace PTG
                 var modifiers = config.InitialHeightModifier.GetComponents<BaseMapHeightModifier>();
 
                 foreach (var modifier in modifiers)
-                    modifier.Execute(mapResolution, heightMap, terrain.terrainData.heightmapScale);
+                    modifier.Execute(config, mapResolution, heightMap, terrain.terrainData.heightmapScale);
             }
 
             for (var i = 0; i < config.NumBiomes; i++)
@@ -301,7 +301,7 @@ namespace PTG
                 var modifiers = biome.heightModifier.GetComponents<BaseMapHeightModifier>();
 
                 foreach (var modifier in modifiers)
-                    modifier.Execute(mapResolution, heightMap, terrain.terrainData.heightmapScale, _biomeMap, i, biome);
+                    modifier.Execute(config, mapResolution, heightMap, terrain.terrainData.heightmapScale, _biomeMap, i, biome);
             }
 
             if (config.HeightPostProcessingModifier != null)
@@ -309,7 +309,7 @@ namespace PTG
                 var modifiers = config.HeightPostProcessingModifier.GetComponents<BaseMapHeightModifier>();
 
                 foreach (var modifier in modifiers)
-                    modifier.Execute(mapResolution, heightMap, terrain.terrainData.heightmapScale);
+                    modifier.Execute(config, mapResolution, heightMap, terrain.terrainData.heightmapScale);
             }
 
             terrain.terrainData.SetHeights(0, 0, heightMap);
@@ -383,7 +383,7 @@ namespace PTG
                 var modifiers = biome.objectPlacer.GetComponents<BaseObjectPlacer>();
 
                 foreach (var modifier in modifiers)
-                    modifier.Execute(transform, mapResolution, heightMap, terrain.terrainData.heightmapScale, _slopeMap,
+                    modifier.Execute(config, transform, mapResolution, heightMap, terrain.terrainData.heightmapScale, _slopeMap,
                         alphaMaps, alphaMapResolution, _biomeMap, i, biome);
             }
         }
@@ -433,7 +433,7 @@ namespace PTG
 
                 textureLayer.diffuseTexture = textureConfig.diffuse;
                 textureLayer.normalMapTexture = textureConfig.normal;
-                
+
                 var layerPath = System.IO.Path.Combine(scenePath, $"Layer_{textureLayerIndex}");
                 AssetDatabase.CreateAsset(textureLayer, layerPath);
             }
