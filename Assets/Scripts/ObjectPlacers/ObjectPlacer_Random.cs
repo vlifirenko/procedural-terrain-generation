@@ -36,7 +36,7 @@ namespace PTG.ObjectPlacers
                     Undo.RegisterCreatedObjectUndo(spawnedGO, "Placed object");
                 }
 #else
-            Instantiate(Prefab, spawnLocation, Quaternion.identity, objectRoot);
+            Instantiate(prefab, spawnLocation, Quaternion.identity, objectRoot);
 #endif
             }
         }

@@ -24,14 +24,15 @@ namespace PTG.HeightMapModifiers
                 {
                     var spawnIndex = Random.Range(0, spawnLocations.Count);
                     var spawnPos = spawnLocations[spawnIndex];
-                    
+
                     spawnLocations.RemoveAt(spawnIndex);
-                    SpawnBuilding(building, spawnPos.x, spawnPos.y, mapResolution, heightMap, heightMapScale, buildingRoot);
+                    SpawnBuilding(globalConfig, building, spawnPos.x, spawnPos.y, mapResolution, heightMap, heightMapScale,
+                        buildingRoot);
                 }
             }
         }
 
-        private void SpawnBuilding(BuildingConfig building, int spawnX, int spawnY, int mapResolution,
+        private void SpawnBuilding(ProcGenConfig globalConfig, BuildingConfig building, int spawnX, int spawnY, int mapResolution,
             float[,] heightMap, Vector3 heightMapScale, Transform buildingRoot)
         {
             var averageHeight = 0f;
@@ -49,6 +50,12 @@ namespace PTG.HeightMapModifiers
             averageHeight /= numHeightSamples;
 
             var targetHeight = averageHeight;
+
+            if (!building.canGoInWater)
+                targetHeight = Mathf.Max(targetHeight, globalConfig.waterHeight / heightMapScale.y);
+            if (building.hasHeightLimits)
+                targetHeight = Mathf.Clamp(targetHeight, building.minHeightToSpawn / heightMapScale.y,
+                    building.maxHeightToSpawn / heightMapScale.y);
 
             for (var y = -building.radius; y <= building.radius; y++)
             {

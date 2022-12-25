@@ -1,16 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using PTG.HeightMapModifiers;
 using PTG.Model.Config;
 using UnityEngine;
-#if UNITY_EDITOR
 using PTG.Model;
 using PTG.ObjectPlacers;
 using PTG.TexturePainters;
 using UnityEditor;
 using UnityEngine.SceneManagement;
-
-#endif
+using Random = UnityEngine.Random;
 
 namespace PTG
 {
@@ -19,7 +19,6 @@ namespace PTG
         [SerializeField] private ProcGenConfig config;
         [SerializeField] private Terrain terrain;
 
-#if UNITY_EDITOR
         private byte[,] _biomeMap_LowResolution;
         private float[,] _biomeStrengths_LowResolution;
 
@@ -39,36 +38,121 @@ namespace PTG
             new Vector2Int(-1, 1),
         };
 
-        private Dictionary<TextureConfig, int> _biomeTextureToTerrainLayerIndex = new Dictionary<TextureConfig, int>();
-#endif
+        private readonly Dictionary<TextureConfig, int> _biomeTextureToTerrainLayerIndex = new Dictionary<TextureConfig, int>();
 
 #if UNITY_EDITOR
-
         public void RegenerateTextures()
         {
             Perform_LayerSetup();
         }
 
-        public void RegenerateWorld()
+        private void Perform_LayerSetup()
         {
-            // cache the map resolution
-            var mapResolution = terrain.terrainData.heightmapResolution;
-            var alphaMapResolution = terrain.terrainData.alphamapResolution;
+            if (terrain.terrainData.terrainLayers != null && terrain.terrainData.terrainLayers.Length > 0)
+            {
+                Undo.RecordObject(terrain, "Clearing previous layers");
 
-            for (var i = transform.childCount - 1; i >= 0; i--)
-                Undo.DestroyObjectImmediate(transform.GetChild(i).gameObject);
+                var layersToDelete = new List<string>();
+                foreach (var layer in terrain.terrainData.terrainLayers)
+                {
+                    if (layer == null)
+                        continue;
+
+                    layersToDelete.Add(AssetDatabase.GetAssetPath(layer.GetInstanceID()));
+                }
+
+                terrain.terrainData.terrainLayers = null;
+                foreach (var layerFile in layersToDelete)
+                {
+                    if (string.IsNullOrEmpty(layerFile))
+                        continue;
+
+                    AssetDatabase.DeleteAsset(layerFile);
+                }
+
+                Undo.FlushUndoRecordObjects();
+            }
+
+            var scenePath = System.IO.Path.GetDirectoryName(SceneManager.GetActiveScene().path);
 
             Perform_GenerateTextureMapping();
 
+            var numLayers = _biomeTextureToTerrainLayerIndex.Count;
+            var newLayers = new List<TerrainLayer>();
+
+            for (var i = 0; i < numLayers; i++)
+                newLayers.Add(new TerrainLayer());
+
+            foreach (var entry in _biomeTextureToTerrainLayerIndex)
+            {
+                var textureConfig = entry.Key;
+                var textureLayerIndex = entry.Value;
+                var textureLayer = newLayers[textureLayerIndex];
+
+                textureLayer.diffuseTexture = textureConfig.diffuse;
+                textureLayer.normalMapTexture = textureConfig.normal;
+
+                var layerPath = System.IO.Path.Combine(scenePath, $"Layer_{textureLayerIndex}");
+                AssetDatabase.CreateAsset(textureLayer, layerPath);
+            }
+
+            Undo.RecordObject(terrain.terrainData, "Updating terrain layers");
+            terrain.terrainData.terrainLayers = newLayers.ToArray();
+        }
+#endif
+
+        public IEnumerator AsyncRegenerateWorld(Action<int, int, string> reportStatusFunction = null)
+        {
+            var mapResolution = terrain.terrainData.heightmapResolution;
+            var alphaMapResolution = terrain.terrainData.alphamapResolution;
+
+            reportStatusFunction?.Invoke(1, 7, "Beginning Generation");
+            yield return new WaitForSeconds(1f);
+
+            for (var i = transform.childCount - 1; i >= 0; i--)
+            {
+#if UNITY_EDITOR
+                if (Application.isPlaying)
+                    Destroy(transform.GetChild(i).gameObject);
+                else
+                    Undo.DestroyObjectImmediate(transform.GetChild(i).gameObject);
+#else
+                Destroy(transform.GetChild(i).gameObject);
+#endif
+            }
+
+            reportStatusFunction?.Invoke(2, 7, "Building texture map");
+            yield return new WaitForSeconds(1f);
+
+            Perform_GenerateTextureMapping();
+
+            reportStatusFunction?.Invoke(3, 7, "Beginning low res biome map");
+            yield return new WaitForSeconds(1f);
+
             Perform_BiomeGeneration_LowResolution((int) config.biomeMapBaseResolution);
+
+            reportStatusFunction?.Invoke(4, 7, "Beginning high res biome map");
+            yield return new WaitForSeconds(1f);
 
             Perform_BiomeGeneration_HighResolution((int) config.biomeMapBaseResolution, mapResolution);
 
+            reportStatusFunction?.Invoke(5, 7, "Modifying heights");
+            yield return new WaitForSeconds(1f);
+
             Perform_HeightMapModification(mapResolution, alphaMapResolution);
+
+            reportStatusFunction?.Invoke(6, 7, "Painting the terrain");
+            yield return new WaitForSeconds(1f);
 
             Perform_TerrainPainting(mapResolution, alphaMapResolution);
 
+            reportStatusFunction?.Invoke(7, 7, "Placing objects");
+            yield return new WaitForSeconds(1f);
+
             Perform_ObjectPlacement(mapResolution, alphaMapResolution);
+
+            reportStatusFunction?.Invoke(7, 7, "Generation complete");
+            yield return new WaitForSeconds(1f);
         }
 
         public int GetLayerForTexture(TextureConfig textureConfig) => _biomeTextureToTerrainLayerIndex[textureConfig];
@@ -387,60 +471,5 @@ namespace PTG
                         alphaMaps, alphaMapResolution, _biomeMap, i, biome);
             }
         }
-
-        private void Perform_LayerSetup()
-        {
-            if (terrain.terrainData.terrainLayers != null && terrain.terrainData.terrainLayers.Length > 0)
-            {
-                Undo.RecordObject(terrain, "Clearing previous layers");
-
-                var layersToDelete = new List<string>();
-                foreach (var layer in terrain.terrainData.terrainLayers)
-                {
-                    if (layer == null)
-                        continue;
-
-                    layersToDelete.Add(AssetDatabase.GetAssetPath(layer.GetInstanceID()));
-                }
-
-                terrain.terrainData.terrainLayers = null;
-                foreach (var layerFile in layersToDelete)
-                {
-                    if (string.IsNullOrEmpty(layerFile))
-                        continue;
-
-                    AssetDatabase.DeleteAsset(layerFile);
-                }
-
-                Undo.FlushUndoRecordObjects();
-            }
-
-            var scenePath = System.IO.Path.GetDirectoryName(SceneManager.GetActiveScene().path);
-
-            Perform_GenerateTextureMapping();
-
-            var numLayers = _biomeTextureToTerrainLayerIndex.Count;
-            var newLayers = new List<TerrainLayer>();
-
-            for (var i = 0; i < numLayers; i++)
-                newLayers.Add(new TerrainLayer());
-
-            foreach (var entry in _biomeTextureToTerrainLayerIndex)
-            {
-                var textureConfig = entry.Key;
-                var textureLayerIndex = entry.Value;
-                var textureLayer = newLayers[textureLayerIndex];
-
-                textureLayer.diffuseTexture = textureConfig.diffuse;
-                textureLayer.normalMapTexture = textureConfig.normal;
-
-                var layerPath = System.IO.Path.Combine(scenePath, $"Layer_{textureLayerIndex}");
-                AssetDatabase.CreateAsset(textureLayer, layerPath);
-            }
-
-            Undo.RecordObject(terrain.terrainData, "Updating terrain layers");
-            terrain.terrainData.terrainLayers = newLayers.ToArray();
-        }
-#endif
     }
 }
