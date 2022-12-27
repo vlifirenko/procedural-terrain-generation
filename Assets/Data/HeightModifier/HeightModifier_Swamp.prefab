@@ -61,6 +61,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   strength: 1
   heightDelta: 5
+  passes:
+  - heightDelta: 5
+    noiseScale: 0.0078125
+  - heightDelta: 2.5
+    noiseScale: 0.015625
+  - heightDelta: 1.25
+    noiseScale: 0.03125
   xScale: 0.0078125
   yScale: 0.0078125
   numPasses: 3

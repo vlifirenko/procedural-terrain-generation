@@ -68,6 +68,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   strength: 1
   smoothingKernelSize: 4
+  useAdaptiveKernel: 1
+  maxHeightThreshold: 0.15
+  minKernelSize: 1
+  maxKernelSize: 5
 --- !u!114 &8968064786525192814
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -95,9 +99,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   strength: 1
-  smoothingKernelSize: 5
   buildings:
   - heightMap: {fileID: 2800000, guid: add28abac2e2cca42af0b2abd7935eb7, type: 3}
     prefab: {fileID: 7880999669688678654, guid: e8c210deacd13b9489985aa64cd18939, type: 3}
     radius: 25
     numToSpawn: 5
+    hasHeightLimits: 0
+    minHeightToSpawn: 0
+    maxHeightToSpawn: 0
+    canGoInWater: 0
+    canGoAboveWater: 1

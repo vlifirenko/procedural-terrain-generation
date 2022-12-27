@@ -1,26 +1,18 @@
-﻿using PTG.Model.Config;
+﻿using System.Collections.Generic;
+using PTG.Model;
+using PTG.Model.Config;
 using UnityEngine;
 
 namespace PTG.HeightMapModifiers
 {
     public class HeightMapModifier_Noise : BaseMapHeightModifier
     {
-        [SerializeField] private float heightDelta;
-        [SerializeField] private float xScale = 1f;
-        [SerializeField] private float yScale = 1f;
-        [SerializeField] private int numPasses = 1;
-        [SerializeField] private float xScaleVariationPerPass = 2f;
-        [SerializeField] private float yScaleVariationPerPass = 2f;
-        [SerializeField] private float heightDeltaVariationPerPass = 0.5f;
+        [SerializeField] private List<HeightNoisePass> passes;
 
         public override void Execute(ProcGenConfig globalConfig, int mapResolution, float[,] heightMap, Vector3 heightMapScale,
             byte[,] biomeMap = null, int biomeIndex = -1, BiomeConfig biome = null)
         {
-            var workingXScale = xScale;
-            var workingYScale = yScale;
-            var workingHeightDelta = heightDelta;
-
-            for (var pass = 0; pass < numPasses; pass++)
+            foreach (var pass in passes)
             {
                 for (var y = 0; y < mapResolution; y++)
                 {
@@ -29,16 +21,12 @@ namespace PTG.HeightMapModifiers
                         if (biomeIndex >= 0 && biomeMap[x, y] != biomeIndex)
                             continue;
 
-                        var noiseValue = Mathf.PerlinNoise(x * workingXScale, y * workingYScale) * 2f - 1f;
-                        var newHeight = heightMap[x, y] + noiseValue * workingHeightDelta / heightMapScale.y;
+                        var noiseValue = Mathf.PerlinNoise(x * pass.noiseScale, y * pass.noiseScale) * 2f - 1f;
+                        var newHeight = heightMap[x, y] + noiseValue * pass.heightDelta / heightMapScale.y;
 
                         heightMap[x, y] = Mathf.Lerp(heightMap[x, y], newHeight, strength);
                     }
                 }
-
-                workingXScale *= xScaleVariationPerPass;
-                workingYScale *= yScaleVariationPerPass;
-                workingHeightDelta *= heightDeltaVariationPerPass;
             }
         }
     }

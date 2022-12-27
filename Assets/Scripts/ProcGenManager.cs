@@ -18,6 +18,8 @@ namespace PTG
     {
         [SerializeField] private ProcGenConfig config;
         [SerializeField] private Terrain terrain;
+        
+        [SerializeField] private bool DEBUG_TurnOffObjectPlacers;
 
         private byte[,] _biomeMap_LowResolution;
         private float[,] _biomeStrengths_LowResolution;
@@ -455,6 +457,9 @@ namespace PTG
 
         private void Perform_ObjectPlacement(int mapResolution, int alphaMapResolution)
         {
+            if (DEBUG_TurnOffObjectPlacers)
+                return;
+            
             var heightMap = terrain.terrainData.GetHeights(0, 0, mapResolution, mapResolution);
             var alphaMaps = terrain.terrainData.GetAlphamaps(0, 0, alphaMapResolution, alphaMapResolution);
 

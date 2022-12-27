@@ -8,11 +8,15 @@ namespace PTG.TexturePainters
     public class TexturePainter_Random : BaseTexturePainter
     {
         [SerializeField] private List<TextureConfig> textures;
+        [SerializeField] private TextureConfig baseTexture;
+        [SerializeField] private List<RandomPainterConfig> paintingConfigs;
 
         public override void Execute(ProcGenManager procGenManager, int mapResolution, float[,] heightMap, Vector3 heightmapScale,
             float[,] slopeMap, float[,,] alphaMaps, int alphaMapResolution, byte[,] biomeMap = null, int biomeIndex = -1,
             BiomeConfig biome = null)
         {
+            var baseTextureLayer = procGenManager.GetLayerForTexture(baseTexture);
+            
             for (var y = 0; y < alphaMapResolution; y++)
             {
                 var heightMapY = Mathf.FloorToInt((float) y * mapResolution / alphaMapResolution);
@@ -25,10 +29,17 @@ namespace PTG.TexturePainters
                     if (biomeIndex >= 0 && biomeMap[heightMapX, heightMapY] != biomeIndex)
                         continue;
 
-                    var randomTexture = textures[Random.Range(0, textures.Count)];
-                    var terrainLayer = procGenManager.GetLayerForTexture(randomTexture);
-
-                    alphaMaps[x, y, terrainLayer] = strength;
+                    foreach (var config in paintingConfigs)
+                    {
+                        var noiseValue = Mathf.PerlinNoise(x * config.noiseScale, y * config.noiseScale);
+                        if (Random.Range(0f, 1f) >= noiseValue)
+                        {
+                            var layer = procGenManager.GetLayerForTexture(config.textureToPaint);
+                            alphaMaps[x, y, layer] = strength * config.intensityModifier;
+                        }
+                    }
+                    
+                    alphaMaps[x, y, baseTextureLayer] = strength;
                 }
             }
         }

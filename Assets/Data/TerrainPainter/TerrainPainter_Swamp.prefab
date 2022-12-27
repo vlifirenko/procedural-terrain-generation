@@ -50,3 +50,13 @@ MonoBehaviour:
     normal: {fileID: 0}
   - diffuse: {fileID: 2800000, guid: d6577540c8f040a49a9d70b24407c585, type: 3}
     normal: {fileID: 0}
+  baseTexture:
+    diffuse: {fileID: 2800000, guid: db05d76cd29834149b49361b3b08abda, type: 3}
+    normal: {fileID: 0}
+  paintingConfigs:
+  - textureToPaint:
+      diffuse: {fileID: 2800000, guid: d6577540c8f040a49a9d70b24407c585, type: 3}
+      normal: {fileID: 0}
+    intensityModifier: 1
+    noiseScale: 0.0625
+    noiseThreshold: 0.25

@@ -4,7 +4,7 @@ using UnityEngine;
 namespace PTG.Model
 {
     [Serializable]
-    public class TextureConfig : System.IEquatable<TextureConfig>
+    public class TextureConfig : IEquatable<TextureConfig>
     {
         public Texture2D diffuse;
         public Texture2D normal;
