@@ -131,12 +131,12 @@ namespace PTG
             reportStatusFunction?.Invoke(3, 7, "Beginning low res biome map");
             yield return new WaitForSeconds(1f);
 
-            Perform_BiomeGeneration_LowResolution((int) config.biomeMapBaseResolution);
+            Perform_BiomeGeneration_LowResolution((int) config.resolution);
 
             reportStatusFunction?.Invoke(4, 7, "Beginning high res biome map");
             yield return new WaitForSeconds(1f);
 
-            Perform_BiomeGeneration_HighResolution((int) config.biomeMapBaseResolution, mapResolution);
+            Perform_BiomeGeneration_HighResolution((int) config.resolution, mapResolution);
 
             reportStatusFunction?.Invoke(5, 7, "Modifying heights");
             yield return new WaitForSeconds(1f);
