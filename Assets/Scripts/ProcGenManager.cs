@@ -95,7 +95,7 @@ namespace PTG
                 textureLayer.normalMapTexture = textureConfig.normal;
 
                 var layerPath = System.IO.Path.Combine(scenePath, $"Layer_{textureLayerIndex}");
-                AssetDatabase.CreateAsset(textureLayer, layerPath);
+                AssetDatabase.CreateAsset(textureLayer, $"{layerPath}.asset");
             }
 
             Undo.RecordObject(terrain.terrainData, "Updating terrain layers");

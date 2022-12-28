@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 namespace PTG.Model
 {
@@ -6,8 +7,8 @@ namespace PTG.Model
     public class RandomPainterConfig
     {
         public TextureConfig textureToPaint;
-        public float intensityModifier = 1f;
+        [Range(0f, 1f)] public float intensityModifier = 1f;
         public float noiseScale;
-        public float noiseThreshold;
+        [Range(0f, 1f)] public float noiseThreshold;
     }
 }
