@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using PTG.TexturePainters;
+using PTG.Terrain.TexturePainters;
 using UnityEngine;
 
 namespace PTG.Model.Config

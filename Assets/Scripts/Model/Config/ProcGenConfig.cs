@@ -11,7 +11,7 @@ namespace PTG.Model.Config
     {
         public List<BiomeConfigItem> biomes;
         [Range(0f, 1f)] public float biomeSeedPointDensity = 0.1f;
-        [FormerlySerializedAs("biomeMapBaseResolution")] public EResolution resolution = EResolution.Size_64x64;
+        [FormerlySerializedAs("resolution")] [FormerlySerializedAs("biomeMapBaseResolution")] public ETerrainResolution terrainResolution = ETerrainResolution.Size_64x64;
         
         public GameObject InitialHeightModifier;
         public GameObject HeightPostProcessingModifier;
