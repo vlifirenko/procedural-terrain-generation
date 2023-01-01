@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using PTG.Terrain.DetailPainters;
 using PTG.Terrain.TexturePainters;
 using UnityEngine;
 
@@ -18,6 +19,7 @@ namespace PTG.Model.Config
         public GameObject heightModifier;
         public GameObject terrainPainter;
         public GameObject objectPlacer;
+        public GameObject detailPainter;
 
         public List<TextureConfig> RetrieveTextures()
         {
@@ -35,6 +37,27 @@ namespace PTG.Model.Config
                     continue;
 
                 allTextures.AddRange(painterTextures);
+            }
+
+            return allTextures;
+        }
+        
+        public List<TerrainDetailConfig> RetrieveTerrainDetails()
+        {
+            if (detailPainter == null)
+                return null;
+
+            var allTextures = new List<TerrainDetailConfig>();
+            var allPainters = terrainPainter.GetComponents<BaseDetailPainter>();
+
+            foreach (var painter in allPainters)
+            {
+                var terrainDetails = painter.RetrieveTerrainDetails();
+
+                if (terrainDetails == null || terrainDetails.Count == 0)
+                    continue;
+
+                allTextures.AddRange(terrainDetails);
             }
 
             return allTextures;

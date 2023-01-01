@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using PTG.Model;
 using PTG.Model.Config;
+using PTG.Terrain.DetailPainters;
 using PTG.Terrain.HeightMapModifiers;
 using PTG.Terrain.ObjectPlacers;
 using PTG.Terrain.TexturePainters;
@@ -18,7 +19,7 @@ namespace PTG.Terrain
     {
         [SerializeField] private ProcGenConfig config;
         [SerializeField] private UnityEngine.Terrain terrain;
-        
+
         [SerializeField] private bool DEBUG_TurnOffObjectPlacers;
 
         private byte[,] _biomeMap_LowResolution;
@@ -42,10 +43,18 @@ namespace PTG.Terrain
 
         private readonly Dictionary<TextureConfig, int> _biomeTextureToTerrainLayerIndex = new Dictionary<TextureConfig, int>();
 
+        private readonly Dictionary<TerrainDetailConfig, int> _biomeTerrainDetailToDetailLayerIndex =
+            new Dictionary<TerrainDetailConfig, int>();
+
 #if UNITY_EDITOR
         public void RegenerateTextures()
         {
             Perform_LayerSetup();
+        }
+
+        public void RegenerateDetailPrototypes()
+        {
+            Perform_DetailPrototypeSetup();
         }
 
         private void Perform_LayerSetup()
@@ -101,12 +110,18 @@ namespace PTG.Terrain
             Undo.RecordObject(terrain.terrainData, "Updating terrain layers");
             terrain.terrainData.terrainLayers = newLayers.ToArray();
         }
+
+        private void Perform_DetailPrototypeSetup()
+        {
+        }
 #endif
 
         public IEnumerator AsyncRegenerateWorld(Action<int, int, string> reportStatusFunction = null)
         {
             var mapResolution = terrain.terrainData.heightmapResolution;
             var alphaMapResolution = terrain.terrainData.alphamapResolution;
+            var detailMapResolution = terrain.terrainData.detailResolution;
+            var maxDetailItems = terrain.terrainData.detailResolutionPerPatch;
 
             reportStatusFunction?.Invoke(1, 7, "Beginning Generation");
             yield return new WaitForSeconds(1f);
@@ -127,6 +142,11 @@ namespace PTG.Terrain
             yield return new WaitForSeconds(1f);
 
             Perform_GenerateTextureMapping();
+
+            reportStatusFunction?.Invoke(2, 7, "Building detail map");
+            yield return new WaitForSeconds(1f);
+
+            Perform_GenerateTerrainDetailMapping();
 
             reportStatusFunction?.Invoke(3, 7, "Beginning low res biome map");
             yield return new WaitForSeconds(1f);
@@ -153,8 +173,12 @@ namespace PTG.Terrain
 
             Perform_ObjectPlacement(mapResolution, alphaMapResolution);
 
-            reportStatusFunction?.Invoke(7, 7, "Generation complete");
+            reportStatusFunction?.Invoke(7, 7, "Detail painting");
             yield return new WaitForSeconds(1f);
+
+            Perform_DetailPainting(mapResolution, alphaMapResolution, detailMapResolution, maxDetailItems);
+
+            reportStatusFunction?.Invoke(7, 7, "Generation complete");
         }
 
         public int GetLayerForTexture(TextureConfig textureConfig) => _biomeTextureToTerrainLayerIndex[textureConfig];
@@ -194,6 +218,45 @@ namespace PTG.Terrain
             foreach (var textureConfig in allTextures)
             {
                 _biomeTextureToTerrainLayerIndex[textureConfig] = layerIndex;
+                layerIndex++;
+            }
+        }
+
+        private void Perform_GenerateTerrainDetailMapping()
+        {
+            _biomeTerrainDetailToDetailLayerIndex.Clear();
+
+            var allTerrainDetails = new List<TerrainDetailConfig>();
+            foreach (var biomeMetaData in config.biomes)
+            {
+                var biomeTerrainDetails = biomeMetaData.biome.RetrieveTerrainDetails();
+                if (biomeTerrainDetails == null || biomeTerrainDetails.Count == 0)
+                    continue;
+
+                allTerrainDetails.AddRange(biomeTerrainDetails);
+            }
+
+            if (config.detailPaintingPostProcessingModifier != null)
+            {
+                var allPainters = config.detailPaintingPostProcessingModifier.GetComponents<BaseDetailPainter>();
+                foreach (var painter in allPainters)
+                {
+                    var terrainDetails = painter.RetrieveTerrainDetails();
+
+                    if (terrainDetails == null || terrainDetails.Count == 0)
+                        continue;
+
+                    allTerrainDetails.AddRange(terrainDetails);
+                }
+            }
+
+            allTerrainDetails = allTerrainDetails.Distinct().ToList();
+
+            var layerIndex = 0;
+
+            foreach (var terrainDetail in allTerrainDetails)
+            {
+                _biomeTerrainDetailToDetailLayerIndex[terrainDetail] = layerIndex;
                 layerIndex++;
             }
         }
@@ -418,7 +481,6 @@ namespace PTG.Terrain
             var heightMap = terrain.terrainData.GetHeights(0, 0, mapResolution, mapResolution);
             var alphaMaps = terrain.terrainData.GetAlphamaps(0, 0, alphaMapResolution, alphaMapResolution);
 
-
             for (var y = 0; y < alphaMapResolution; y++)
             {
                 for (var x = 0; x < alphaMapResolution; x++)
@@ -459,7 +521,7 @@ namespace PTG.Terrain
         {
             if (DEBUG_TurnOffObjectPlacers)
                 return;
-            
+
             var heightMap = terrain.terrainData.GetHeights(0, 0, mapResolution, mapResolution);
             var alphaMaps = terrain.terrainData.GetAlphamaps(0, 0, alphaMapResolution, alphaMapResolution);
 
@@ -475,6 +537,47 @@ namespace PTG.Terrain
                     modifier.Execute(config, transform, mapResolution, heightMap, terrain.terrainData.heightmapScale, _slopeMap,
                         alphaMaps, alphaMapResolution, _biomeMap, i, biome);
             }
+        }
+
+        private void Perform_DetailPainting(int mapResolution, int alphaMapResolution, int detailMapResolution,
+            int maxDetailItems)
+        {
+            var heightMap = terrain.terrainData.GetHeights(0, 0, mapResolution, mapResolution);
+            var alphaMaps = terrain.terrainData.GetAlphamaps(0, 0, alphaMapResolution, alphaMapResolution);
+            var numDetailLayers = terrain.terrainData.detailPrototypes.Length;
+            var detailLayerMaps = new List<int[,]>(numDetailLayers);
+
+            for (var layerIndex = 0; layerIndex < numDetailLayers; layerIndex++)
+            {
+                var layerMap = terrain.terrainData.GetDetailLayer(0, 0, detailMapResolution,
+                    detailMapResolution, layerIndex);
+                detailLayerMaps.Add(layerMap);
+            }
+
+            for (var i = 0; i < config.NumBiomes; i++)
+            {
+                var biome = config.biomes[i].biome;
+                if (biome.detailPainter == null)
+                    continue;
+
+                var modifiers = biome.detailPainter.GetComponents<BaseDetailPainter>();
+
+                foreach (var modifier in modifiers)
+                    modifier.Execute(this, mapResolution, heightMap, terrain.terrainData.heightmapScale, _slopeMap,
+                        alphaMaps, alphaMapResolution, detailLayerMaps, detailMapResolution, maxDetailItems, _biomeMap, i, biome);
+            }
+
+            if (config.detailPaintingPostProcessingModifier != null)
+            {
+                var modifiers = config.detailPaintingPostProcessingModifier.GetComponents<BaseDetailPainter>();
+
+                foreach (var modifier in modifiers)
+                    modifier.Execute(this, mapResolution, heightMap, terrain.terrainData.heightmapScale, _slopeMap,
+                        alphaMaps, alphaMapResolution, detailLayerMaps, detailMapResolution, maxDetailItems);
+            }
+
+            for (var layerIndex = 0; layerIndex < numDetailLayers; layerIndex++)
+                terrain.terrainData.SetDetailLayer(0, 0, layerIndex, detailLayerMaps[layerIndex]);
         }
     }
 }

@@ -16,6 +16,7 @@ namespace PTG.Model.Config
         public GameObject InitialHeightModifier;
         public GameObject HeightPostProcessingModifier;
         public GameObject paintingPostProcessingModifier;
+        public GameObject detailPaintingPostProcessingModifier;
 
         public float waterHeight = 15f;
 
