@@ -113,6 +113,50 @@ namespace PTG.Terrain
 
         private void Perform_DetailPrototypeSetup()
         {
+            Perform_GenerateTerrainDetailMapping();
+
+            var detailPrototypes = new DetailPrototype[_biomeTerrainDetailToDetailLayerIndex.Count];
+            foreach (var kvp in _biomeTerrainDetailToDetailLayerIndex)
+            {
+                var detailData = kvp.Key;
+                var layerIndex = kvp.Value;
+                var newDetail = new DetailPrototype();
+
+                if (detailData.detailPrefab)
+                {
+                    newDetail.prototype = detailData.detailPrefab;
+                    newDetail.renderMode = DetailRenderMode.VertexLit;
+                    newDetail.usePrototypeMesh = true;
+                    newDetail.useInstancing = true;
+                }
+                else
+                {
+                    newDetail.prototypeTexture = detailData.billboardTexture;
+                    newDetail.renderMode = DetailRenderMode.GrassBillboard;
+                    newDetail.usePrototypeMesh = false;
+                    newDetail.useInstancing = false;
+                    newDetail.healthyColor = detailData.healthyColor;
+                    newDetail.dryColor = detailData.dryColor;
+                }
+
+                newDetail.minWidth = detailData.minWidth;
+                newDetail.maxWidth = detailData.maxWidth;
+                newDetail.minHeight = detailData.minHeight;
+                newDetail.maxHeight = detailData.maxHeight;
+                newDetail.noiseSeed = detailData.noiseSeed;
+                newDetail.noiseSpread = detailData.noiseSpread;
+                newDetail.holeEdgePadding = detailData.holeEdgePadding;
+
+                if (!newDetail.Validate(out var errorMessage))
+                    throw new InvalidOperationException(errorMessage);
+
+                detailPrototypes[layerIndex] = newDetail;
+            }
+
+            Undo.RecordObject(terrain.terrainData, "Updating Detail Prototypes");
+
+            terrain.terrainData.detailPrototypes = detailPrototypes;
+            terrain.terrainData.RefreshPrototypes();
         }
 #endif
 
@@ -182,6 +226,9 @@ namespace PTG.Terrain
         }
 
         public int GetLayerForTexture(TextureConfig textureConfig) => _biomeTextureToTerrainLayerIndex[textureConfig];
+
+        public int GetDetailLayerForTerrainDetail(TerrainDetailConfig detailConfig) =>
+            _biomeTerrainDetailToDetailLayerIndex[detailConfig];
 
         private void Perform_GenerateTextureMapping()
         {
@@ -549,8 +596,7 @@ namespace PTG.Terrain
 
             for (var layerIndex = 0; layerIndex < numDetailLayers; layerIndex++)
             {
-                var layerMap = terrain.terrainData.GetDetailLayer(0, 0, detailMapResolution,
-                    detailMapResolution, layerIndex);
+                var layerMap = new int[detailMapResolution, detailMapResolution];
                 detailLayerMaps.Add(layerMap);
             }
 

@@ -24,6 +24,15 @@ namespace PTG.Editor
 
                 targetManager.RegenerateTextures();
             }
+            
+            if (GUILayout.Button("Regenerate Detail Prototypes"))
+            {
+                var targetManager = serializedObject.targetObject as ProcGenManager;
+                if (targetManager == null)
+                    throw new Exception("targetManager is null");
+
+                targetManager.RegenerateDetailPrototypes();
+            }
 
             if (GUILayout.Button("Regenerate World"))
             {

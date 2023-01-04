@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2999424873208069127
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1851170559000040800}
+  - component: {fileID: 7724261560249375129}
+  m_Layer: 0
+  m_Name: DetailPainter_GrassyPlains
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1851170559000040800
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2999424873208069127}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7724261560249375129
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2999424873208069127}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7055be46c5944ce9bccdd8cf98978306, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  strength: 1
+  paintingConfigs:
+  - detailToPaint:
+      billboardTexture: {fileID: 2800000, guid: 453a6a5d24e14ef4aa9752638404f895, type: 3}
+      healthyColor: {r: 0.062401228, g: 0.2264151, b: 0.039871823, a: 1}
+      dryColor: {r: 0.198, g: 0.18158048, b: 0.025112195, a: 1}
+      detailPrefab: {fileID: 0}
+      minWidth: 1
+      maxWidth: 2
+      minHeight: 1
+      maxHeight: 2
+      noiseSeed: 0
+      noiseSpread: 0.1
+      holeEdgePadding: 0
+    intensityModifier: 1
+    noiseScale: 0.03125
+    noiseThreshold: 0.5

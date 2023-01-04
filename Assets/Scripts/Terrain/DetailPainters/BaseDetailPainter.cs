@@ -7,11 +7,11 @@ namespace PTG.Terrain.DetailPainters
 {
     public abstract class BaseDetailPainter : MonoBehaviour
     {
-        [SerializeField, Range(0f, 1f)] private float strength = 1f;
+        [SerializeField, Range(0f, 1f)] protected float strength = 1f;
 
-        public virtual void Execute(ProcGenManager p0, int mapResolution, float[,] heightMap, Vector3 terrainDataHeightmapScale,
+        public virtual void Execute(ProcGenManager procGenManager, int mapResolution, float[,] heightMap, Vector3 terrainDataHeightmapScale,
             float[,] slopeMap, float[,,] alphaMaps, int alphaMapResolution, List<int[,]> detailLayerMaps,
-            int detailMapResolution, int maxDetailItems, byte[,] biomeMap = null, int i = -1, BiomeConfig biome = null)
+            int detailMapResolution, int maxDetailItems, byte[,] biomeMap = null, int biomeIndex = -1, BiomeConfig biome = null)
         {
             Debug.LogError($"No implementation of Execute function for {gameObject.name}");
         }

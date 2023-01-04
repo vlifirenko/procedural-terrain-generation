@@ -19,7 +19,5 @@ MonoBehaviour:
   maxDecayRate: 0.2
   heightModifier: {fileID: 871424789203265994, guid: 4d3a10542ceabfa45acedf502674f142, type: 3}
   terrainPainter: {fileID: 472561104542651329, guid: 340014de903ae014a8d3b83a3d38c76c, type: 3}
-  textures:
-  - uniqueID: bush-mud
-    diffuse: {fileID: 2800000, guid: d6577540c8f040a49a9d70b24407c585, type: 3}
-    normal: {fileID: 0}
+  objectPlacer: {fileID: 0}
+  detailPainter: {fileID: 2999424873208069127, guid: 5d9660c43c183d649adaeff70e8a3e06, type: 3}

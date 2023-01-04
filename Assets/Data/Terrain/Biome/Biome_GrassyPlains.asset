@@ -20,3 +20,4 @@ MonoBehaviour:
   heightModifier: {fileID: 871424789203265994, guid: f223405b99b0a784c8315be58c77f0be, type: 3}
   terrainPainter: {fileID: 472561104542651329, guid: b80daaa051d7d534b92b9061986fd30a, type: 3}
   objectPlacer: {fileID: 7873144076796657020, guid: 27854d8cf7c32f841aa1527610844ef3, type: 3}
+  detailPainter: {fileID: 2999424873208069127, guid: f48b0ca760fa4b44ea9919d2a17bd6c4, type: 3}

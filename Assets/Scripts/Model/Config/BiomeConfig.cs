@@ -46,9 +46,9 @@ namespace PTG.Model.Config
         {
             if (detailPainter == null)
                 return null;
-
-            var allTextures = new List<TerrainDetailConfig>();
-            var allPainters = terrainPainter.GetComponents<BaseDetailPainter>();
+                
+            var allTerrainDetails = new List<TerrainDetailConfig>();
+            var allPainters = detailPainter.GetComponents<BaseDetailPainter>();
 
             foreach (var painter in allPainters)
             {
@@ -57,10 +57,10 @@ namespace PTG.Model.Config
                 if (terrainDetails == null || terrainDetails.Count == 0)
                     continue;
 
-                allTextures.AddRange(terrainDetails);
+                allTerrainDetails.AddRange(terrainDetails);
             }
 
-            return allTextures;
+            return allTerrainDetails;
         }
     }
 }
